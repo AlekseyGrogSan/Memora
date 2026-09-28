@@ -1,0 +1,19 @@
+FROM ruby:4.0.7-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+    build-essential git libpq-dev libyaml-dev pkg-config libvips && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# Copy app
+COPY . .
+
+EXPOSE 3000
+CMD ["sh", "-c", "rm -f tmp/pids/server.pid && ./bin/rails db:prepare && ./bin/rails server -b 0.0.0.0"]
